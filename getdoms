@@ -1,0 +1,38 @@
+#!/usr/bin/env python3
+
+import warnings
+warnings.filterwarnings("ignore", message="urllib3 (.+) or chardet (.+)/charset_normalizer (.+) doesn't match a supported version!")
+
+import tldextract
+import sys
+
+def extract_main_domains(filename):
+    main_domains = set()
+
+    try:
+        with open(filename, 'r') as file:
+            for line in file:
+                domain = line.strip()
+                if domain:
+                    try:
+                        ext = tldextract.extract(domain)
+                        main_domain = f"{ext.domain}.{ext.suffix}"
+                        main_domains.add(main_domain)
+                    except Exception:
+                        pass
+    except FileNotFoundError:
+        print(f"File {filename} not found.", file=sys.stderr)
+        sys.exit(1)
+
+    return main_domains
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python extractdoms.py <input_file>")
+        sys.exit(1)
+
+    input_file = sys.argv[1]
+    domains = extract_main_domains(input_file)
+
+    for domain in sorted(domains):
+        print(domain)
